@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "see-lyrics",
+  "description": "The extension accurately determines rating changes and displays them in a separate column on the contest rank page.",
+  "version": "1.0",
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "tabs", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://leetcode.com/contest/*/ranking/*/",
+    "https://leetcode.com/*/ranking/",
+    "https://leetcode.com/contest/*/ranking"
+  ],
+  "action": {
+    "default_title": "leetForecaster",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}
