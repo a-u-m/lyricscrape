@@ -13,14 +13,9 @@
     "service_worker": "background.js"
   },
   "permissions": ["storage", "tabs", "scripting", "activeTab"],
-  "host_permissions": [
-    "https://leetcode.com/contest/*/ranking/*/",
-    "https://leetcode.com/*/ranking/",
-    "https://leetcode.com/contest/*/ranking"
-  ],
+  "host_permissions": ["https://www.youtube.com/watch?v=*"],
   "action": {
     "default_title": "leetForecaster",
     "default_popup": "popup.html"
-  },
-  "options_page": "options.html"
+  }
 }

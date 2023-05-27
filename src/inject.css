@@ -1,0 +1,79 @@
+#secondary-inner-lyrics {
+  border: 1px solid rgb(116, 116, 116);
+  border-radius: 1rem;
+  color: white;
+  font-size: 1.3rem;
+  padding: 5%;
+  height: 50vh;
+  margin-bottom: 3%;
+  overflow: scroll;
+}
+#lyrics-loader-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#lyrics-loader-svg {
+  width: 3.25em;
+  -webkit-animation: rotate4 2s linear infinite;
+  animation: rotate4 2s linear infinite;
+}
+
+#lyrics-loader-circle {
+  fill: none;
+  stroke: hsl(0, 0%, 100%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  -webkit-animation: dash4 1.5s ease-in-out infinite;
+  animation: dash4 1.5s ease-in-out infinite;
+}
+
+@-webkit-keyframes rotate4 {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate4 {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+}
+
+@keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+}
