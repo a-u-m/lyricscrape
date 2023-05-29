@@ -6,29 +6,17 @@ const options = {
   artist: "",
   optimizeQuery: true,
 };
-const addLyricBlock = () => {
-  let secondaryInnerLyricBlock = document.querySelector(
-    "#secondary-inner-lyrics"
-  );
-  if (secondaryInnerLyricBlock === null) {
-    const secondaryInnerPanels = document.querySelector(
-      "#secondary #secondary-inner #panels"
-    );
-    secondaryInnerLyricBlock = document.createElement("div");
-    secondaryInnerLyricBlock.setAttribute("id", "secondary-inner-lyrics");
-    secondaryInnerPanels.before(secondaryInnerLyricBlock);
-    secondaryInnerLyricBlock.innerHTML =
-      '<div id="lyrics-loader-container"><svg id="lyrics-loader-svg" viewBox="25 25 50 50"><circle id="lyrics-loader-circle" r="20" cy="50" cx="50"></circle></svg></div>';
-  } else {
-    secondaryInnerLyricBlock.innerHTML =
-      '<div id="lyrics-loader-container"><svg id="lyrics-loader-svg" viewBox="25 25 50 50"><circle id="lyrics-loader-circle" r="20" cy="50" cx="50"></circle></svg></div>';
-  }
 
-  const musicVideoMetadata = document.getElementsByTagName(
-    "ytd-video-description-music-section-renderer"
+const fetchLyrics = () => {
+  console.log("fetch lyrics");
+  const primaryInnerLyricsBlock = document.querySelector(
+    "#ce-primary-inner-lyrics-block"
   );
-  if (musicVideoMetadata.length) {
-    console.log("inside");
+  console.log(primaryInnerLyricsBlock);
+  const ytMusicVideoMetadata = document.querySelectorAll(
+    "#description ytd-video-description-music-section-renderer"
+  );
+  if (ytMusicVideoMetadata.length) {
     const song = document.querySelector(
       "ytd-video-description-music-section-renderer #info-rows ytd-info-row-renderer:nth-child(1) #default-metadata-section yt-formatted-string"
     );
@@ -39,37 +27,113 @@ const addLyricBlock = () => {
     options.artist = artist.textContent.trim();
     getLyrics(options).then((lyrics) => {
       if (lyrics === null)
-        secondaryInnerLyricBlock.innerHTML =
+        primaryInnerLyricsBlock.innerHTML =
           '<div id="lyrics-loader-container">lyrics not found!</div>';
-      else secondaryInnerLyricBlock.innerText = lyrics;
+      else primaryInnerLyricsBlock.innerText = lyrics;
     });
   } else {
-    secondaryInnerLyricBlock.innerHTML =
+    primaryInnerLyricsBlock.innerHTML =
       "<div>Video doesn't have any metadata</div>";
     return;
   }
 };
 
-function handleNoMutations() {
-  addLyricBlock();
-  observer.disconnect();
-}
-
-const observer = new MutationObserver((mutationsList) => {
-  clearTimeout(timeout);
-  timeout = setTimeout(handleNoMutations, 100);
-});
-
-let timeout = setTimeout(handleNoMutations, 100);
-
-const observerConfig = {
-  attributes: true,
-  childList: true,
-  subtree: true,
+const waitDOMYtReqComponent = () => {
+  const ytSecondaryInnerPanel = document.querySelector(
+    "#secondary #secondary-inner #panels"
+  );
+  const ytDescription = document.querySelector(
+    "#description ytd-text-inline-expander"
+  );
+  if (!ytSecondaryInnerPanel || !ytDescription) {
+    setTimeout(waitDOMYtReqComponent, 50);
+    return;
+  } else addBaseStructure();
 };
 
-observer.observe(document, observerConfig);
-// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-//   secondaryInnerLyricBlock.innerHTML =
-//     '<div id="lyrics-loader-container"><svg id="lyrics-loader-svg" viewBox="25 25 50 50"><circle id="lyrics-loader-circle" r="20" cy="50" cx="50"></circle></svg></div>';
-// });
+const toggleHandler = (event) => {
+  const primaryInnerLyricsBlock = document.querySelector(
+    "#ce-primary-inner-lyrics-block"
+  );
+  primaryInnerLyricsBlock.classList.toggle("ce-display-none");
+  if (event.srcElement.innerText.trim() === "Show Lyrics")
+    event.srcElement.innerText = "Hide Lyrics";
+  else event.srcElement.innerText = "Show Lyrics";
+};
+
+const mutationObserver = () => {
+  const ytDescription = document.querySelector(
+    "#description ytd-text-inline-expander"
+  );
+  const observer = new MutationObserver((mutationsList) => {
+    // Changes detected, perform necessary actions
+    console.log(mutationsList);
+    clearTimeout(timeout);
+    timeout = setTimeout(timeoutFunction, 1000);
+  });
+
+  const observerConfig = {
+    attributes: true,
+    childList: true,
+    subtree: true,
+  };
+
+  observer.observe(ytDescription, observerConfig);
+
+  const timeoutFunction = () => {
+    // No changes detected within the timeout duration
+    // Perform the desired function here
+    observer.disconnect();
+    console.log("No changes detected.");
+    fetchLyrics();
+  };
+
+  let timeout = setTimeout(timeoutFunction, 1000);
+};
+
+const addBaseStructure = () => {
+  let primaryLyricsBlock = document.querySelector("#ce-primary-lyrics-block");
+  const refAdjacentElement = document.querySelector(
+    //future proofing
+    "#secondary #secondary-inner #panels"
+  );
+  if (!primaryLyricsBlock && refAdjacentElement) {
+    primaryLyricsBlock = document.createElement("div");
+    primaryLyricsBlock.setAttribute("id", "ce-primary-lyrics-block");
+
+    const primaryInnerLyricsBlock = document.createElement("div");
+    primaryInnerLyricsBlock.setAttribute("id", "ce-primary-inner-lyrics-block");
+    primaryInnerLyricsBlock.classList.add("ce-display-none");
+    primaryInnerLyricsBlock.innerHTML =
+      '<div id="ce-lyrics-loader-container"><svg id="ce-lyrics-loader-svg" viewBox="25 25 50 50"><circle id="ce-lyrics-loader-circle" r="20" cy="50" cx="50"></circle></svg></div>';
+
+    const primaryInnerLyricsToggler = document.createElement("div");
+    primaryInnerLyricsToggler.setAttribute(
+      "id",
+      "ce-primary-inner-lyrics-toggler"
+    );
+    primaryInnerLyricsToggler.innerText = "Show Lyrics";
+    primaryInnerLyricsToggler.addEventListener("click", toggleHandler);
+
+    primaryLyricsBlock.appendChild(primaryInnerLyricsBlock);
+    primaryLyricsBlock.appendChild(primaryInnerLyricsToggler);
+    refAdjacentElement.before(primaryLyricsBlock);
+  } else {
+    const primaryInnerLyricsBlock = document.querySelector(
+      "#ce-primary-inner-lyrics-block"
+    );
+    const primaryInnerLyricsToggler = document.querySelector(
+      "#ce-primary-inner-lyrics-toggler"
+    );
+
+    primaryInnerLyricsBlock.classList.add("ce-display-none");
+    primaryInnerLyricsBlock.innerHTML =
+      '<div id="ce-lyrics-loader-container"><svg id="ce-lyrics-loader-svg" viewBox="25 25 50 50"><circle id="ce-lyrics-loader-circle" r="20" cy="50" cx="50"></circle></svg></div>';
+
+    primaryInnerLyricsToggler.innerText = "Show Lyrics";
+  }
+
+  mutationObserver();
+};
+
+waitDOMYtReqComponent();
