@@ -1,4 +1,11 @@
 import { getLyrics, getSong } from "genius-lyrics-api";
+import {
+  manualInputForm,
+  noLyrics,
+  noMetadata,
+  orDialog,
+  loadingAnimation,
+} from "./utils/htmlComponents";
 
 const options = {
   apiKey: "",
@@ -8,34 +15,77 @@ const options = {
 };
 
 const fetchLyrics = () => {
-  console.log("fetch lyrics");
   const primaryInnerLyricsBlock = document.querySelector(
     "#ce-primary-inner-lyrics-block"
   );
-  console.log(primaryInnerLyricsBlock);
   const ytMusicVideoMetadata = document.querySelectorAll(
     "#description ytd-video-description-music-section-renderer"
   );
   if (ytMusicVideoMetadata.length) {
     const song = document.querySelector(
-      "ytd-video-description-music-section-renderer #info-rows ytd-info-row-renderer:nth-child(1) #default-metadata-section yt-formatted-string"
+      `ytd-video-description-music-section-renderer 
+      #info-rows ytd-info-row-renderer:nth-child(1) 
+      #default-metadata-section yt-formatted-string`
     );
     const artist = document.querySelector(
-      "ytd-video-description-music-section-renderer #info-rows ytd-info-row-renderer:nth-child(2) #default-metadata-section yt-formatted-string"
+      `ytd-video-description-music-section-renderer 
+      #info-rows ytd-info-row-renderer:nth-child(2) 
+      #default-metadata-section yt-formatted-string`
     );
-    options.title = song.textContent.trim();
-    options.artist = artist.textContent.trim();
-    getLyrics(options).then((lyrics) => {
-      if (lyrics === null)
-        primaryInnerLyricsBlock.innerHTML =
-          '<div id="lyrics-loader-container">lyrics not found!</div>';
-      else primaryInnerLyricsBlock.innerText = lyrics;
-    });
+    options.title = song.textContent.trim().split("(")[0];
+    options.artist = artist.textContent.trim().split(",")[0];
+    console.log(options.title);
+    console.log(options.artist);
+    try {
+      getLyrics(options).then((lyrics) => {
+        if (lyrics === null) {
+          primaryInnerLyricsBlock.innerHTML = "";
+          primaryInnerLyricsBlock.appendChild(noLyrics);
+          primaryInnerLyricsBlock.appendChild(manualInputForm);
+          manualLyricSearch();
+        } else primaryInnerLyricsBlock.innerText = lyrics;
+      });
+    } catch (e) {
+      primaryInnerLyricsBlock.innerHTML = "";
+      primaryInnerLyricsBlock.appendChild(noMetadata);
+      primaryInnerLyricsBlock.appendChild(manualInputForm);
+      manualLyricSearch();
+    }
   } else {
-    primaryInnerLyricsBlock.innerHTML =
-      "<div>Video doesn't have any metadata</div>";
-    return;
+    primaryInnerLyricsBlock.innerHTML = "";
+    primaryInnerLyricsBlock.appendChild(noMetadata);
+    primaryInnerLyricsBlock.appendChild(manualInputForm);
+    primaryInnerLyricsBlock.appendChild(orDialog);
+    manualLyricSearch();
   }
+};
+
+const manualLyricSearch = () => {
+  const manualSearchButton = document.querySelector(
+    "#ce-manual-form-box #ce-manual-button"
+  );
+  const primaryInnerLyricsBlock = document.querySelector(
+    "#ce-primary-inner-lyrics-block"
+  );
+  manualSearchButton.addEventListener("click", (e) => {
+    options.artist = document.querySelector(
+      "#ce-manual-form-box #artistInput"
+    ).value;
+    options.title = document.querySelector(
+      "#ce-manual-form-box #songInput"
+    ).value;
+    primaryInnerLyricsBlock.innerHTML = "";
+    primaryInnerLyricsBlock.appendChild(loadingAnimation);
+    getLyrics(options).then((lyrics) => {
+      if (lyrics) primaryInnerLyricsBlock.innerText = lyrics;
+      else {
+        primaryInnerLyricsBlock.innerHTML = "";
+        primaryInnerLyricsBlock.appendChild(noLyrics);
+        primaryInnerLyricsBlock.appendChild(manualInputForm);
+        manualLyricSearch();
+      }
+    });
+  });
 };
 
 const waitDOMYtReqComponent = () => {
@@ -66,8 +116,6 @@ const mutationObserver = () => {
     "#description ytd-text-inline-expander"
   );
   const observer = new MutationObserver((mutationsList) => {
-    // Changes detected, perform necessary actions
-    console.log(mutationsList);
     clearTimeout(timeout);
     timeout = setTimeout(timeoutFunction, 1000);
   });
@@ -104,8 +152,12 @@ const addBaseStructure = () => {
     const primaryInnerLyricsBlock = document.createElement("div");
     primaryInnerLyricsBlock.setAttribute("id", "ce-primary-inner-lyrics-block");
     primaryInnerLyricsBlock.classList.add("ce-display-none");
-    primaryInnerLyricsBlock.innerHTML =
-      '<div id="ce-lyrics-loader-container"><svg id="ce-lyrics-loader-svg" viewBox="25 25 50 50"><circle id="ce-lyrics-loader-circle" r="20" cy="50" cx="50"></circle></svg></div>';
+    primaryInnerLyricsBlock.innerHTML = "";
+    primaryInnerLyricsBlock.appendChild(loadingAnimation);
+    primaryInnerLyricsBlock.style.fontSize =
+      lyricscrapeSettings.fontSize + "px";
+    primaryInnerLyricsBlock.style.lineHeight = lyricscrapeSettings.lineHeight;
+    // primaryInnerLyricsBlock.appendChild(reloader);
 
     const primaryInnerLyricsToggler = document.createElement("div");
     primaryInnerLyricsToggler.setAttribute(
@@ -115,8 +167,18 @@ const addBaseStructure = () => {
     primaryInnerLyricsToggler.innerText = "Show Lyrics";
     primaryInnerLyricsToggler.addEventListener("click", toggleHandler);
 
+    // handle light theme ---- default for dark theme
+    if (lyricscrapeSettings.theme === "light") {
+      primaryInnerLyricsBlock.classList.add("ce-lyrics-block-light");
+      primaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-light");
+    } else {
+      primaryInnerLyricsBlock.classList.add("ce-lyrics-block-dark");
+      primaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-dark");
+    }
+
     primaryLyricsBlock.appendChild(primaryInnerLyricsBlock);
     primaryLyricsBlock.appendChild(primaryInnerLyricsToggler);
+    // primaryLyricsBlock.appendChild(reloader);
     refAdjacentElement.before(primaryLyricsBlock);
   } else {
     const primaryInnerLyricsBlock = document.querySelector(
@@ -126,14 +188,69 @@ const addBaseStructure = () => {
       "#ce-primary-inner-lyrics-toggler"
     );
 
+    // handle light theme ---- default for dark theme
+    if (lyricscrapeSettings.theme === "light") {
+      primaryInnerLyricsBlock.classList.remove("ce-lyrics-block-dark");
+      primaryInnerLyricsBlock.classList.add("ce-lyrics-block-light");
+      primaryInnerLyricsToggler.classList.remove("ce-lyrics-toggler-dark");
+      primaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-light");
+    } else {
+      primaryInnerLyricsBlock.classList.remove("ce-lyrics-block-light");
+      primaryInnerLyricsBlock.classList.add("ce-lyrics-block-dark");
+      primaryInnerLyricsToggler.classList.remove("ce-lyrics-toggler-light");
+      primaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-dark");
+    }
+
     primaryInnerLyricsBlock.classList.add("ce-display-none");
-    primaryInnerLyricsBlock.innerHTML =
-      '<div id="ce-lyrics-loader-container"><svg id="ce-lyrics-loader-svg" viewBox="25 25 50 50"><circle id="ce-lyrics-loader-circle" r="20" cy="50" cx="50"></circle></svg></div>';
+    primaryInnerLyricsBlock.innerHTML = "";
+    primaryInnerLyricsBlock.appendChild(loadingAnimation);
+    primaryInnerLyricsBlock.style.fontSize =
+      lyricscrapeSettings.fontSize + "px";
+    primaryInnerLyricsBlock.style.lineHeight = lyricscrapeSettings.lineHeight;
 
     primaryInnerLyricsToggler.innerText = "Show Lyrics";
   }
 
   mutationObserver();
+  // setTimeout(fetchLyrics, 1000);
+};
+const retrieveSettings = async () => {
+  const result = await new Promise((resolve) => {
+    chrome.storage.sync.get(["lyricscrape"], (result) => {
+      resolve(result);
+    });
+  });
+
+  if (result.lyricscrape) {
+    if (result.lyricscrape.fontSize) {
+      lyricscrapeSettings.fontSize = result.lyricscrape.fontSize;
+    }
+    if (result.lyricscrape.lineHeight) {
+      lyricscrapeSettings.lineHeight = result.lyricscrape.lineHeight;
+    }
+  }
+  const darkVal = document.querySelector("html").getAttribute("dark");
+  lyricscrapeSettings.theme = darkVal === "" ? "dark" : "light";
+  console.log(lyricscrapeSettings);
 };
 
-waitDOMYtReqComponent();
+const storageChangeHandler = (changes, areaName) => {
+  if (areaName === "sync" && changes.lyricscrape) {
+    const newLyricscrapeValue = changes.lyricscrape.newValue;
+    const primaryInnerLyricsBlock = document.querySelector(
+      "#ce-primary-inner-lyrics-block"
+    );
+    primaryInnerLyricsBlock.style.fontSize =
+      newLyricscrapeValue.fontSize + "px";
+    primaryInnerLyricsBlock.style.lineHeight = newLyricscrapeValue.lineHeight;
+  }
+};
+
+const programFLow = async () => {
+  await retrieveSettings();
+  waitDOMYtReqComponent();
+};
+
+let lyricscrapeSettings = { fontSize: 12, lineHeight: 1.45 };
+programFLow();
+chrome.storage.onChanged.addListener(storageChangeHandler);

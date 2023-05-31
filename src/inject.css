@@ -1,10 +1,8 @@
 #ce-primary-lyrics-block {
   margin-bottom: 3%;
 }
+
 #ce-primary-inner-lyrics-block {
-  border: 1px solid rgb(116, 116, 116);
-  border-radius: 1rem;
-  color: white;
   font-size: 1.3rem;
   padding: 5%;
   height: 50vh;
@@ -12,24 +10,87 @@
   overflow: scroll;
 }
 
+.ce-lyrics-block-dark {
+  border: 1px solid #747474;
+  /* border: 1px solid #272727; */
+  border-radius: 1rem;
+  color: white;
+}
+
+.ce-lyrics-block-light {
+  border: 1px solid #e5e5e5;
+  border-radius: 1rem;
+  color: black;
+}
+
 .ce-display-none {
   display: none;
 }
 
 #ce-primary-inner-lyrics-toggler {
-  border: 1px solid rgb(82, 82, 82);
-  border-radius: 2.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
   padding: 0.8rem;
   font-size: 1.4rem;
   font-weight: 500;
   cursor: pointer;
+  margin: 0 1%;
 }
-#ce-primary-inner-lyrics-toggler:hover {
+
+.ce-lyrics-toggler-dark {
+  border: 1px solid #3f3f3f;
+  border-radius: 2.5rem;
+  color: white;
+}
+
+.ce-lyrics-toggler-light {
+  border: 1px solid #e5e5e5;
+  border-radius: 2.5rem;
+  color: black;
+}
+
+.ce-lyrics-toggler-dark:hover {
   background-color: #3f3f3f;
+}
+
+.ce-lyrics-toggler-light:hover {
+  background-color: #e5e5e5;
+}
+
+#ce-manual-form-box {
+  /* border: 1px solid #3f3f3f; */
+  background-color: black;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  margin: 1rem 0;
+}
+
+#ce-manual-button {
+  border: 1px solid #3f3f3f;
+  border-radius: 0.5rem;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  margin: 1rem 0;
+  cursor: pointer;
+}
+
+#ce-manual-button:hover {
+  background-color: #3f3f3f;
+}
+
+.manual-input {
+  border: none;
+  outline: none;
+  outline-offset: none;
+  margin: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  padding: 1rem;
 }
 
 #ce-lyrics-loader-container {
@@ -39,6 +100,13 @@
   justify-content: center;
   align-items: center;
 }
+
+#ce-lyrics-reloader {
+  position: relative;
+  top: 0;
+  right: 0;
+}
+
 #ce-lyrics-loader-svg {
   width: 3.25em;
   -webkit-animation: rotate4 2s linear infinite;
@@ -56,6 +124,15 @@
   animation: dash4 1.5s ease-in-out infinite;
 }
 
+#ce-or-dialog {
+  background-color: #272727;
+  border: 1px solid #272727;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+#ce-or-dialog li {
+  margin: 0.5rem;
+}
 @-webkit-keyframes rotate4 {
   100% {
     -webkit-transform: rotate(360deg);

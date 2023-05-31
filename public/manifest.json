@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "see-lyrics",
+  "name": "lyricscrape : lyrics for youtube music videos",
   "description": "lyrics lyrics lyrics!",
-  "version": "1.0",
+  "version": "1.0.0",
   "icons": {
     "16": "logo.png",
     "32": "logo.png",
@@ -12,10 +12,10 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage", "tabs", "scripting", "activeTab"],
+  "permissions": ["storage", "tabs", "scripting", "activeTab", "webNavigation"],
   "host_permissions": ["https://www.youtube.com/watch?v=*"],
   "action": {
-    "default_title": "leetForecaster",
+    "default_title": "lyricscrape",
     "default_popup": "popup.html"
   }
 }
