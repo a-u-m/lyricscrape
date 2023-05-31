@@ -1,0 +1,26 @@
+// const ytDescription = document.querySelector(
+//   "#description ytd-text-inline-expander"
+// );
+// let ytExtraDescription = document.querySelector(
+//   "#description ytd-text-inline-expander ytd-structured-description-content-renderer #items"
+// );
+// if (!ytExtraDescription)
+//   ytExtraDescription = document.querySelector(
+//     "#description ytd-text-inline-expander ytd-structured-description-content-renderer"
+//   );
+// const ytExtraDescription = document.querySelectorAll(
+//   "#description ytd-video-description-music-section-renderer"
+// );
+
+// console.log(ytExtraDescription);
+// if (!ytExtraDescription.length) {
+//   fetchLyrics();
+//   return;
+// }
+
+// const ytDescription = document.querySelector(
+//   "#description ytd-text-inline-expander ytd-structured-description-content-renderer #items"
+// );
+// const ytDescription = document.querySelector(
+//   "#description ytd-text-inline-expander"
+// );

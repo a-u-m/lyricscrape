@@ -14,7 +14,7 @@ const options = {
   optimizeQuery: true,
 };
 
-const fetchLyrics = () => {
+const fetchLyrics = async () => {
   const primaryInnerLyricsBlock = document.querySelector(
     "#ce-primary-inner-lyrics-block"
   );
@@ -36,21 +36,17 @@ const fetchLyrics = () => {
     options.artist = artist.textContent.trim().split(",")[0];
     console.log(options.title);
     console.log(options.artist);
-    try {
-      getLyrics(options).then((lyrics) => {
-        if (lyrics === null) {
-          primaryInnerLyricsBlock.innerHTML = "";
-          primaryInnerLyricsBlock.appendChild(noLyrics);
-          primaryInnerLyricsBlock.appendChild(manualInputForm);
-          manualLyricSearch();
-        } else primaryInnerLyricsBlock.innerText = lyrics;
-      });
-    } catch (e) {
-      primaryInnerLyricsBlock.innerHTML = "";
-      primaryInnerLyricsBlock.appendChild(noMetadata);
-      primaryInnerLyricsBlock.appendChild(manualInputForm);
-      manualLyricSearch();
-    }
+
+    console.log("request sent");
+    await getLyrics(options).then((lyrics) => {
+      console.log("lyrics recieved");
+      if (lyrics === null) {
+        primaryInnerLyricsBlock.innerHTML = "";
+        primaryInnerLyricsBlock.appendChild(noLyrics);
+        primaryInnerLyricsBlock.appendChild(manualInputForm);
+        manualLyricSearch();
+      } else primaryInnerLyricsBlock.innerText = lyrics;
+    });
   } else {
     primaryInnerLyricsBlock.innerHTML = "";
     primaryInnerLyricsBlock.appendChild(noMetadata);
@@ -92,13 +88,16 @@ const waitDOMYtReqComponent = () => {
   const ytSecondaryInnerPanel = document.querySelector(
     "#secondary #secondary-inner #panels"
   );
-  const ytDescription = document.querySelector(
-    "#description ytd-text-inline-expander"
-  );
+
+  const ytDescription = document.querySelector("#description ");
   if (!ytSecondaryInnerPanel || !ytDescription) {
-    setTimeout(waitDOMYtReqComponent, 50);
+    console.log("waiting");
+    setTimeout(waitDOMYtReqComponent, 100);
     return;
-  } else addBaseStructure();
+  } else {
+    console.log("adding base structure");
+    addBaseStructure();
+  }
 };
 
 const toggleHandler = (event) => {
@@ -112,10 +111,15 @@ const toggleHandler = (event) => {
 };
 
 const mutationObserver = () => {
-  const ytDescription = document.querySelector(
-    "#description ytd-text-inline-expander"
+  const ytExtraDescription = document.querySelectorAll(
+    "#description ytd-structured-description-content-renderer"
   );
+
   const observer = new MutationObserver((mutationsList) => {
+    for (let m of mutationsList) {
+      console.log("added nodes " + m.addedNodes);
+      console.log("removed nodes " + m.removedNodes);
+    }
     clearTimeout(timeout);
     timeout = setTimeout(timeoutFunction, 1000);
   });
@@ -126,13 +130,14 @@ const mutationObserver = () => {
     subtree: true,
   };
 
-  observer.observe(ytDescription, observerConfig);
+  observer.observe(ytExtraDescription[0], observerConfig);
 
   const timeoutFunction = () => {
     // No changes detected within the timeout duration
     // Perform the desired function here
     observer.disconnect();
     console.log("No changes detected.");
+    console.log("firing up fetchlyrics");
     fetchLyrics();
   };
 
@@ -211,6 +216,7 @@ const addBaseStructure = () => {
     primaryInnerLyricsToggler.innerText = "Show Lyrics";
   }
 
+  console.log("observing description mutation");
   mutationObserver();
   // setTimeout(fetchLyrics, 1000);
 };
@@ -231,7 +237,6 @@ const retrieveSettings = async () => {
   }
   const darkVal = document.querySelector("html").getAttribute("dark");
   lyricscrapeSettings.theme = darkVal === "" ? "dark" : "light";
-  console.log(lyricscrapeSettings);
 };
 
 const storageChangeHandler = (changes, areaName) => {
@@ -248,9 +253,9 @@ const storageChangeHandler = (changes, areaName) => {
 
 const programFLow = async () => {
   await retrieveSettings();
+  console.log(lyricscrapeSettings);
   waitDOMYtReqComponent();
 };
-
 let lyricscrapeSettings = { fontSize: 12, lineHeight: 1.45 };
 programFLow();
 chrome.storage.onChanged.addListener(storageChangeHandler);
