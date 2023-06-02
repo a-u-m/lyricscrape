@@ -1,8 +1,29 @@
 #ce-primary-lyrics-block {
+  position: relative;
   margin-bottom: 3%;
 }
 
 #ce-primary-inner-lyrics-block {
+  font-size: 1.3rem;
+  padding: 5%;
+  height: 50vh;
+  margin-bottom: 2%;
+  overflow: scroll;
+}
+
+.displayHandlerIcon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.displayHandlerIcon svg:hover {
+  filter: brightness(150%);
+}
+
+.ce-inner-first-container {
   font-size: 1.3rem;
   padding: 5%;
   height: 50vh;
@@ -60,7 +81,7 @@
 
 #ce-manual-form-box {
   /* border: 1px solid #3f3f3f; */
-  background-color: black;
+  background-color: transparent;
   border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
