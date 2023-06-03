@@ -32,16 +32,92 @@ const getVideoIdLocalStorage = (key) => {
   });
 };
 
+const display = (srcBlock, dstBlock, error) => {
+  srcBlock.setAttribute("show", false);
+  dstBlock.setAttribute("show", true);
+
+  if (
+    gLoadingBlock.classList.contains("ce-display-none") &&
+    gPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
+    gPrimaryManualBlock.classList.contains("ce-display-none")
+  ) {
+    dstBlock.classList.add("ce-display-none");
+    if (
+      dstBlock.id === "ce-primary-inner-manual-block" &&
+      dstBlock.getAttribute("error") === "true"
+    ) {
+      gSearchIcon.classList.add("ce-display-none");
+      gGoBackIcon.classList.add("ce-display-none");
+      if (dstBlock.firstChild.id === "lyrics-loader-container") {
+        dstBlock.removeChild(gPrimaryManualBlock.firstChild);
+      }
+      dstBlock.prepend(error);
+    }
+  } else {
+    srcBlock.classList.add("ce-display-none");
+    dstBlock.classList.remove("ce-display-none");
+    if (dstBlock.id === "ce-primary-inner-lyrics-block") {
+      gGoBackIcon.classList.add("ce-display-none");
+      gSearchIcon.classList.remove("ce-display-none");
+    } else if (dstBlock.id === "ce-primary-inner-manual-block") {
+      if (dstBlock.getAttribute("error") === "true") {
+        gSearchIcon.classList.add("ce-display-none");
+        gGoBackIcon.classList.add("ce-display-none");
+        if (dstBlock.firstChild.id === "lyrics-loader-container") {
+          dstBlock.removeChild(gPrimaryManualBlock.firstChild);
+        }
+        dstBlock.prepend(error);
+      } else {
+        gSearchIcon.classList.add("ce-display-none");
+        gGoBackIcon.classList.remove("ce-display-none");
+      }
+    } else {
+      gSearchIcon.classList.add("ce-display-none");
+      gGoBackIcon.classList.add("ce-display-none");
+    }
+  }
+};
+
+const dispayInit = () => {
+  gSearchIcon.classList.add("ce-display-none");
+  gGoBackIcon.classList.add("ce-display-none");
+
+  gLoadingBlock.setAttribute("show", true);
+  gPrimaryInnerLyricsBlock.setAttribute("show", false);
+  gPrimaryManualBlock.setAttribute("show", false);
+
+  gLoadingBlock.classList.add("ce-display-none");
+  gPrimaryInnerLyricsBlock.classList.add("ce-display-none");
+  gPrimaryManualBlock.classList.add("ce-display-none");
+
+  gPrimaryInnerLyricsToggler.innerText = "Show Lyrics";
+};
+
+const theme = () => {
+  if (lyricscrapeSettings.theme === "light") {
+    gPrimaryInnerLyricsBlock.classList.remove("ce-lyrics-block-dark");
+    gPrimaryManualBlock.classList.remove("ce-lyrics-block-dark");
+    gLoadingBlock.classList.remove("ce-lyrics-block-dark");
+    gPrimaryInnerLyricsToggler.classList.remove("ce-lyrics-toggler-dark");
+
+    gPrimaryInnerLyricsBlock.classList.add("ce-lyrics-block-light");
+    gPrimaryManualBlock.classList.add("ce-lyrics-block-light");
+    gLoadingBlock.classList.add("ce-lyrics-block-light");
+    gPrimaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-light");
+  } else {
+    gPrimaryInnerLyricsBlock.classList.remove("ce-lyrics-block-light");
+    gPrimaryManualBlock.classList.remove("ce-lyrics-block-light");
+    gLoadingBlock.classList.remove("ce-lyrics-block-light");
+    gPrimaryInnerLyricsToggler.classList.remove("ce-lyrics-toggler-light");
+
+    gPrimaryInnerLyricsBlock.classList.add("ce-lyrics-block-dark");
+    gPrimaryManualBlock.classList.add("ce-lyrics-block-dark");
+    gLoadingBlock.classList.add("ce-lyrics-block-dark");
+    gPrimaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-dark");
+  }
+};
+
 const fetchLyrics = async () => {
-  const lcPrimaryInnerLyricsBlock = document.querySelector(
-    "#ce-primary-inner-lyrics-block"
-  );
-  const lcPrimaryManualBlock = document.querySelector(
-    "#ce-primary-inner-manual-block"
-  );
-  const lcLoadingBlock = document.querySelector(
-    "#ce-primary-inner-loading-block"
-  );
   const ytMusicVideoMetadata = document.querySelectorAll(
     "#description ytd-video-description-music-section-renderer"
   );
@@ -75,136 +151,36 @@ const fetchLyrics = async () => {
       }
       console.log("lyrics injected");
       if (lyrics === null) {
-        lcLoadingBlock.setAttribute("show", false);
-        lcPrimaryInnerLyricsBlock.setAttribute("show", false);
-        lcPrimaryManualBlock.setAttribute("show", true);
-        lcPrimaryManualBlock.setAttribute("error", true);
-        if (lcPrimaryManualBlock.firstChild.id === "lyrics-loader-container")
-          lcPrimaryManualBlock.removeChild(lcPrimaryManualBlock.firstChild);
-        lcPrimaryManualBlock.prepend(noLyrics);
-
-        if (
-          lcLoadingBlock.classList.contains("ce-display-none") &&
-          lcPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
-          lcPrimaryManualBlock.classList.contains("ce-display-none")
-        ) {
-          lcPrimaryManualBlock.classList.add("ce-display-none");
-        } else {
-          lcLoadingBlock.classList.add("ce-display-none");
-          lcPrimaryManualBlock.classList.remove("ce-display-none");
-        }
+        gPrimaryManualBlock.setAttribute("error", true);
+        display(gLoadingBlock, gPrimaryManualBlock, noLyrics);
       } else {
-        lcLoadingBlock.setAttribute("show", false);
-        lcPrimaryInnerLyricsBlock.setAttribute("show", true);
-        lcPrimaryManualBlock.setAttribute("show", false);
-
-        if (
-          lcLoadingBlock.classList.contains("ce-display-none") &&
-          lcPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
-          lcPrimaryManualBlock.classList.contains("ce-display-none")
-        ) {
-          lcPrimaryInnerLyricsBlock.classList.add("ce-display-none");
-        } else {
-          lcLoadingBlock.classList.add("ce-display-none");
-          lcPrimaryInnerLyricsBlock.classList.remove("ce-display-none");
-          gSearchIcon.classList.remove("ce-display-none");
-          gGoBackIcon.classList.add("ce-display-none");
-        }
-        lcPrimaryInnerLyricsBlock.innerText = lyrics;
+        gPrimaryManualBlock.setAttribute("error", false);
+        display(gLoadingBlock, gPrimaryInnerLyricsBlock, "");
+        gPrimaryInnerLyricsBlock.innerText = lyrics;
       }
     });
   } else {
-    lcLoadingBlock.setAttribute("show", false);
-    lcPrimaryInnerLyricsBlock.setAttribute("show", false);
-    lcPrimaryManualBlock.setAttribute("show", true);
-    lcPrimaryManualBlock.setAttribute("error", true);
-    if (lcPrimaryManualBlock.firstChild.id === "lyrics-loader-container")
-      lcPrimaryManualBlock.removeChild(lcPrimaryManualBlock.firstChild);
-    lcPrimaryManualBlock.prepend(noMetadata);
-    if (
-      lcLoadingBlock.classList.contains("ce-display-none") &&
-      lcPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
-      lcPrimaryManualBlock.classList.contains("ce-display-none")
-    ) {
-      lcPrimaryManualBlock.classList.add("ce-display-none");
-    } else {
-      lcLoadingBlock.classList.add("ce-display-none");
-      lcPrimaryManualBlock.classList.remove("ce-display-none");
-    }
+    gPrimaryManualBlock.setAttribute("error", true);
+    display(gLoadingBlock, gPrimaryManualBlock, noMetadata);
   }
 };
 
 const manualLyricSearch = async () => {
-  const lcPrimaryInnerLyricsBlock = document.querySelector(
-    "#ce-primary-inner-lyrics-block"
-  );
-  const lcPrimaryManualBlock = document.querySelector(
-    "#ce-primary-inner-manual-block"
-  );
-  const lcLoadingBlock = document.querySelector(
-    "#ce-primary-inner-loading-block"
-  );
   options.artist = document.querySelector(
     "#ce-manual-form-box #artistInput"
   ).value;
   options.title = document.querySelector(
     "#ce-manual-form-box #songInput"
   ).value;
-
-  lcLoadingBlock.setAttribute("show", true);
-  lcPrimaryInnerLyricsBlock.setAttribute("show", false);
-  lcPrimaryManualBlock.setAttribute("show", false);
-
-  if (
-    lcLoadingBlock.classList.contains("ce-display-none") &&
-    lcPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
-    lcPrimaryManualBlock.classList.contains("ce-display-none")
-  ) {
-    lcLoadingBlock.classList.add("ce-display-none");
-  } else {
-    lcPrimaryManualBlock.classList.add("ce-display-none");
-    lcLoadingBlock.classList.remove("ce-display-none");
-    gSearchIcon.classList.add("ce-display-none");
-    gGoBackIcon.classList.add("ce-display-none");
-  }
-
+  display(gPrimaryManualBlock, gLoadingBlock, "");
   await getLyrics(options).then((lyrics) => {
     console.log("lyrics recieved");
     if (lyrics === null) {
-      lcLoadingBlock.setAttribute("show", false);
-      lcPrimaryInnerLyricsBlock.setAttribute("show", false);
-      if (lcPrimaryManualBlock.firstChild.id === "lyrics-loader-container")
-        lcPrimaryManualBlock.removeChild(lcPrimaryManualBlock.firstChild);
-      lcPrimaryManualBlock.prepend(noLyrics);
-      if (
-        lcLoadingBlock.classList.contains("ce-display-none") &&
-        lcPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
-        lcPrimaryManualBlock.classList.contains("ce-display-none")
-      ) {
-        lcPrimaryManualBlock.classList.add("ce-display-none");
-      } else {
-        lcLoadingBlock.classList.add("ce-display-none");
-        lcPrimaryManualBlock.classList.remove("ce-display-none");
-      }
+      display(gLoadingBlock, gPrimaryManualBlock, noLyrics);
     } else {
-      lcLoadingBlock.setAttribute("show", false);
-      lcPrimaryInnerLyricsBlock.setAttribute("show", true);
-      lcPrimaryManualBlock.setAttribute("show", false);
-
-      if (
-        lcLoadingBlock.classList.contains("ce-display-none") &&
-        lcPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
-        lcPrimaryManualBlock.classList.contains("ce-display-none")
-      ) {
-        lcPrimaryInnerLyricsBlock.classList.add("ce-display-none");
-      } else {
-        lcLoadingBlock.classList.add("ce-display-none");
-        lcPrimaryInnerLyricsBlock.classList.remove("ce-display-none");
-        gSearchIcon.classList.remove("ce-display-none");
-        gGoBackIcon.classList.add("ce-display-none");
-      }
-
-      lcPrimaryInnerLyricsBlock.innerText = lyrics;
+      gPrimaryManualBlock.setAttribute("error", false);
+      display(gLoadingBlock, gPrimaryInnerLyricsBlock, "");
+      gPrimaryInnerLyricsBlock.innerText = lyrics;
     }
   });
 };
@@ -228,25 +204,15 @@ const waitDOMYtReqComponent = () => {
 };
 
 const toggleHandler = (event) => {
-  const lcPrimaryInnerLyricsBlock = document.querySelector(
-    "#ce-primary-inner-lyrics-block"
-  );
-  const lcPrimaryManualLyricsBlock = document.querySelector(
-    "#ce-primary-inner-manual-block"
-  );
-  const lcSearchIcon = document.querySelector("#ce-manual-search-icon");
-  const lcLoadingAnimationBlock = document.querySelector(
-    "#ce-primary-inner-loading-block"
-  );
-  if (lcPrimaryInnerLyricsBlock.getAttribute("show") == "true") {
-    lcPrimaryInnerLyricsBlock.classList.toggle("ce-display-none");
+  if (gPrimaryInnerLyricsBlock.getAttribute("show") == "true") {
+    gPrimaryInnerLyricsBlock.classList.toggle("ce-display-none");
     gSearchIcon.classList.toggle("ce-display-none");
-  } else if (lcPrimaryManualLyricsBlock.getAttribute("show") == "true") {
-    lcPrimaryManualLyricsBlock.classList.toggle("ce-display-none");
-    if (lcPrimaryManualLyricsBlock.getAttribute("error") == null) {
+  } else if (gPrimaryManualBlock.getAttribute("show") == "true") {
+    gPrimaryManualBlock.classList.toggle("ce-display-none");
+    if (gPrimaryManualBlock.getAttribute("error") == null) {
       gGoBackIcon.classList.toggle("ce-display-none");
     }
-  } else lcLoadingAnimationBlock.classList.toggle("ce-display-none");
+  } else gLoadingBlock.classList.toggle("ce-display-none");
   if (event.srcElement.innerText.trim() === "Show Lyrics")
     event.srcElement.innerText = "Hide Lyrics";
   else event.srcElement.innerText = "Show Lyrics";
@@ -256,10 +222,7 @@ const mutationObserver = () => {
   const ytExtraDescription = document.querySelector(
     '#description ytd-text-inline-expander div[slot="extra-content"]'
   );
-  // const ytExtraDescription = document.querySelectorAll(
-  //   "#description #extraco ytd-structured-description-content-renderer"
-  // );
-  console.log(ytExtraDescription);
+
   const observer = new MutationObserver((mutationsList) => {
     for (let m of mutationsList) {
       console.log("added nodes " + m.addedNodes);
@@ -278,8 +241,6 @@ const mutationObserver = () => {
   observer.observe(ytExtraDescription, observerConfig);
 
   const timeoutFunction = async () => {
-    // No changes detected within the timeout duration
-    // Perform the desired function here
     observer.disconnect();
     console.log("No changes detected.");
     console.log("firing up fetchlyrics");
@@ -289,172 +250,80 @@ const mutationObserver = () => {
   let timeout = setTimeout(timeoutFunction, 1000);
 };
 
-const manualDisplay = () => {
-  const lcPrimaryInnerLyricsBlock = document.querySelector(
-    "#ce-primary-inner-lyrics-block"
-  );
-  const lcPrimaryManualBlock = document.querySelector(
-    "#ce-primary-inner-manual-block"
-  );
-  const lcLoadingBlock = document.querySelector(
-    "#ce-primary-inner-loading-block"
-  );
-  lcLoadingBlock.setAttribute("show", false);
-  lcPrimaryInnerLyricsBlock.setAttribute("show", false);
-  lcPrimaryManualBlock.setAttribute("show", true);
-
-  if (
-    lcLoadingBlock.classList.contains("ce-display-none") &&
-    lcPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
-    lcPrimaryManualBlock.classList.contains("ce-display-none")
-  ) {
-    lcPrimaryManualBlock.classList.add("ce-display-none");
-  } else {
-    gSearchIcon.classList.add("ce-display-none");
-    gGoBackIcon.classList.remove("ce-display-none");
-    lcPrimaryInnerLyricsBlock.classList.add("ce-display-none");
-    lcPrimaryManualBlock.classList.remove("ce-display-none");
-  }
-};
-
-const lyricsDisplay = () => {
-  const lcPrimaryInnerLyricsBlock = document.querySelector(
-    "#ce-primary-inner-lyrics-block"
-  );
-  const lcPrimaryManualBlock = document.querySelector(
-    "#ce-primary-inner-manual-block"
-  );
-  const lcLoadingBlock = document.querySelector(
-    "#ce-primary-inner-loading-block"
-  );
-  lcLoadingBlock.setAttribute("show", false);
-  lcPrimaryInnerLyricsBlock.setAttribute("show", true);
-  lcPrimaryManualBlock.setAttribute("show", false);
-
-  if (
-    lcLoadingBlock.classList.contains("ce-display-none") &&
-    lcPrimaryInnerLyricsBlock.classList.contains("ce-display-none") &&
-    lcPrimaryManualBlock.classList.contains("ce-display-none")
-  ) {
-    lcPrimaryInnerLyricsBlock.classList.add("ce-display-none");
-  } else {
-    gSearchIcon.classList.remove("ce-display-none");
-    gGoBackIcon.classList.add("ce-display-none");
-    lcPrimaryManualBlock.classList.add("ce-display-none");
-    lcPrimaryInnerLyricsBlock.classList.remove("ce-display-none");
-  }
-};
-
 const addBaseStructure = () => {
+  const parentBlock = document.querySelector("#secondary #secondary-inner ");
   let primaryLyricsBlock = document.querySelector("#ce-primary-lyrics-block");
-  const refAdjacentElement = document.querySelector(
-    //future proofing
-    "#secondary #secondary-inner #panels"
-  );
-  if (!primaryLyricsBlock && refAdjacentElement) {
+
+  if (!primaryLyricsBlock && parentBlock) {
     primaryLyricsBlock = document.createElement("div");
     primaryLyricsBlock.setAttribute("id", "ce-primary-lyrics-block");
+
     gSearchIcon = searchIcon;
     gGoBackIcon = goBackIcon;
-    primaryLyricsBlock.appendChild(gSearchIcon);
-    primaryLyricsBlock.appendChild(gGoBackIcon);
+    gLoadingBlock = loadingAnimationBlock;
+    gPrimaryInnerLyricsBlock = primaryInnerLyricsBlock;
+    gPrimaryManualBlock = innerManualBlock;
+    gPrimaryInnerLyricsToggler = primaryInnerLyricsToggler;
 
-    gSearchIcon.addEventListener("click", manualDisplay);
-    gGoBackIcon.addEventListener("click", lyricsDisplay);
+    dispayInit();
 
-    loadingAnimationBlock.setAttribute("show", true);
-    loadingAnimationBlock.classList.add("ce-display-none");
+    // font settings
 
-    primaryInnerLyricsBlock.setAttribute("show", false);
-    primaryInnerLyricsBlock.classList.add("ce-display-none");
+    gPrimaryInnerLyricsBlock.style.fontSize =
+      lyricscrapeSettings.fontSize + "px";
+    gPrimaryInnerLyricsBlock.style.lineHeight = lyricscrapeSettings.lineHeight;
 
-    innerManualBlock.setAttribute("show", false);
-    innerManualBlock.classList.add("ce-display-none");
+    // Event Listners
 
-    const searchButton = innerManualBlock.querySelector(
+    const searchButton = gPrimaryManualBlock.querySelector(
       "#ce-manual-form-box #ce-manual-button"
     );
+
     searchButton.addEventListener("click", manualLyricSearch);
+    gSearchIcon.addEventListener("click", () => {
+      display(gPrimaryInnerLyricsBlock, gPrimaryManualBlock, "");
+    });
+    gGoBackIcon.addEventListener("click", () => {
+      display(gPrimaryManualBlock, gPrimaryInnerLyricsBlock, "");
+    });
+    gPrimaryInnerLyricsToggler.addEventListener("click", toggleHandler);
 
-    primaryInnerLyricsBlock.style.fontSize =
-      lyricscrapeSettings.fontSize + "px";
-    primaryInnerLyricsBlock.style.lineHeight = lyricscrapeSettings.lineHeight;
+    // Theme based on yt theme
 
-    primaryInnerLyricsToggler.addEventListener("click", toggleHandler);
+    theme();
 
-    // handle light theme ---- default for dark theme
-    if (lyricscrapeSettings.theme === "light") {
-      primaryInnerLyricsBlock.classList.add("ce-lyrics-block-light");
-      loadingAnimationBlock.classList.add("ce-lyrics-block-light");
-      innerManualBlock.classList.add("ce-lyrics-block-light");
-      primaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-light");
-    } else {
-      primaryInnerLyricsBlock.classList.add("ce-lyrics-block-dark");
-      loadingAnimationBlock.classList.add("ce-lyrics-block-dark");
-      innerManualBlock.classList.add("ce-lyrics-block-dark");
-      primaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-dark");
-    }
+    //
 
-    primaryLyricsBlock.appendChild(loadingAnimationBlock);
-    primaryLyricsBlock.appendChild(primaryInnerLyricsBlock);
-    primaryLyricsBlock.appendChild(innerManualBlock);
-    primaryLyricsBlock.appendChild(primaryInnerLyricsToggler);
-    refAdjacentElement.before(primaryLyricsBlock);
+    primaryLyricsBlock.appendChild(gSearchIcon);
+    primaryLyricsBlock.appendChild(gGoBackIcon);
+    primaryLyricsBlock.appendChild(gLoadingBlock);
+    primaryLyricsBlock.appendChild(gPrimaryInnerLyricsBlock);
+    primaryLyricsBlock.appendChild(gPrimaryManualBlock);
+    primaryLyricsBlock.appendChild(gPrimaryInnerLyricsToggler);
+    parentBlock.prepend(primaryLyricsBlock);
   } else {
-    const lcPrimaryInnerLyricsBlock = document.querySelector(
-      "#ce-primary-inner-lyrics-block"
-    );
-    const lcPrimaryInnerManualBlock = document.querySelector(
-      "#ce-primary-inner-manual-block"
-    );
-    const lcPrimaryInnerLyricsToggler = document.querySelector(
-      "#ce-primary-inner-lyrics-toggler"
-    );
-    const lcLoadingBlock = document.querySelector(
-      "#ce-primary-inner-loading-block"
-    );
     gSearchIcon = document.querySelector("#ce-manual-search-icon");
     gGoBackIcon = document.querySelector("#ce-manual-back-icon");
+    gLoadingBlock = document.querySelector("#ce-primary-inner-loading-block");
+    gPrimaryInnerLyricsBlock = document.querySelector(
+      "#ce-primary-inner-lyrics-block"
+    );
+    gPrimaryManualBlock = document.querySelector(
+      "#ce-primary-inner-manual-block"
+    );
+    gPrimaryInnerLyricsToggler = document.querySelector(
+      "#ce-primary-inner-lyrics-toggler"
+    );
 
-    gSearchIcon.classList.add("ce-display-none");
-    gGoBackIcon.classList.add("ce-display-none");
+    dispayInit();
 
     // handle light theme ---- default for dark theme
-    if (lyricscrapeSettings.theme === "light") {
-      lcPrimaryInnerLyricsBlock.classList.remove("ce-lyrics-block-dark");
-      lcPrimaryInnerManualBlock.classList.remove("ce-lyrics-block-dark");
-      lcLoadingBlock.classList.remove("ce-lyrics-block-dark");
-      lcPrimaryInnerLyricsToggler.classList.remove("ce-lyrics-toggler-dark");
+    theme();
 
-      lcPrimaryInnerLyricsBlock.classList.add("ce-lyrics-block-light");
-      lcPrimaryInnerManualBlock.classList.add("ce-lyrics-block-light");
-      lcLoadingBlock.classList.add("ce-lyrics-block-light");
-      lcPrimaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-light");
-    } else {
-      lcPrimaryInnerLyricsBlock.classList.remove("ce-lyrics-block-light");
-      lcPrimaryInnerManualBlock.classList.remove("ce-lyrics-block-light");
-      lcLoadingBlock.classList.remove("ce-lyrics-block-light");
-      lcPrimaryInnerLyricsToggler.classList.remove("ce-lyrics-toggler-light");
-
-      lcPrimaryInnerLyricsBlock.classList.add("ce-lyrics-block-dark");
-      lcPrimaryInnerManualBlock.classList.add("ce-lyrics-block-dark");
-      lcLoadingBlock.classList.add("ce-lyrics-block-dark");
-      lcPrimaryInnerLyricsToggler.classList.add("ce-lyrics-toggler-dark");
-    }
-
-    lcLoadingBlock.setAttribute("show", true);
-    lcPrimaryInnerLyricsBlock.setAttribute("show", false);
-    lcPrimaryInnerManualBlock.setAttribute("show", false);
-
-    lcLoadingBlock.classList.add("ce-display-none");
-    lcPrimaryInnerManualBlock.classList.add("ce-display-none");
-    lcPrimaryInnerLyricsBlock.classList.add("ce-display-none");
-
-    lcPrimaryInnerLyricsBlock.style.fontSize =
+    // font settings
+    gPrimaryInnerLyricsBlock.style.fontSize =
       lyricscrapeSettings.fontSize + "px";
     primaryInnerLyricsBlock.style.lineHeight = lyricscrapeSettings.lineHeight;
-
-    lcPrimaryInnerLyricsToggler.innerText = "Show Lyrics";
   }
 
   console.log("observing description mutation");
@@ -499,17 +368,13 @@ const programFLow = async () => {
   console.log(lyricscrapeSettings);
   waitDOMYtReqComponent();
 };
+
 let lyricscrapeSettings = { fontSize: 12, lineHeight: 1.45 };
 let gSearchIcon, gGoBackIcon, gVideoId;
-let gPrimaryInnerLyricsBlock, gPrimaryManualBlock, gLoadingBlock;
-// const lcPrimaryInnerLyricsBlock = document.querySelector(
-//   "#ce-primary-inner-lyrics-block"
-// );
-// const lcPrimaryManualBlock = document.querySelector(
-//   "#ce-primary-inner-manual-block"
-// );
-// const lcLoadingBlock = document.querySelector(
-//   "#ce-primary-inner-loading-block"
-// );
+let gPrimaryInnerLyricsBlock,
+  gPrimaryManualBlock,
+  gLoadingBlock,
+  gPrimaryInnerLyricsToggler;
+
 programFLow();
 chrome.storage.onChanged.addListener(storageChangeHandler);
