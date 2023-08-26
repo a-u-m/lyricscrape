@@ -1,15 +1,15 @@
-const noLyrics = document.createElement("div");
-noLyrics.setAttribute("id", "lyrics-loader-container");
+const noLyrics = document.createElement('div');
+noLyrics.setAttribute('id', 'lyrics-loader-container');
 noLyrics.innerText =
-  "lyrics not found! Maybe there is some issue with the metadata. Wanna try searching manually?";
+  'lyrics not found! Maybe there is some issue with the metadata. Wanna try searching manually?';
 
-const noMetadata = document.createElement("div");
-noMetadata.setAttribute("id", "lyrics-loader-container");
+const noMetadata = document.createElement('div');
+noMetadata.setAttribute('id', 'lyrics-loader-container');
 noMetadata.innerText =
-  "Whoops! No Metadata found. Wanna try searching manually?";
+  'Whoops! No Metadata found. Wanna try searching manually?';
 
-const orDialog = document.createElement("div");
-orDialog.setAttribute("id", "ce-or-dialog");
+const orDialog = document.createElement('div');
+orDialog.setAttribute('id', 'ce-or-dialog');
 orDialog.innerHTML = `
 <b>Things you may try when you are not satified with the result or you get a wrong output.</b>
 <ul>
@@ -17,10 +17,10 @@ orDialog.innerHTML = `
 <li>Try refreshing to solve any DOM related issues.</li>
 </ul>`;
 
-const searchIcon = document.createElement("div");
-searchIcon.setAttribute("id", "ce-manual-search-icon");
-searchIcon.classList.add("ce-display-none");
-searchIcon.classList.add("displayHandlerIcon");
+const searchIcon = document.createElement('div');
+searchIcon.setAttribute('id', 'ce-manual-search-icon');
+searchIcon.classList.add('ce-display-none');
+searchIcon.classList.add('displayHandlerIcon');
 searchIcon.innerHTML = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gray" class="w-6 h-6">
   <path d="M8.25 10.875a2.625 2.625 0 115.25 0 2.625 2.625 0 01-5.25 0z" />
@@ -29,10 +29,10 @@ searchIcon.innerHTML = `
 
 `;
 
-const goBackIcon = document.createElement("div");
-goBackIcon.setAttribute("id", "ce-manual-back-icon");
-goBackIcon.classList.add("ce-display-none");
-goBackIcon.classList.add("displayHandlerIcon");
+const goBackIcon = document.createElement('div');
+goBackIcon.setAttribute('id', 'ce-manual-back-icon');
+goBackIcon.classList.add('ce-display-none');
+goBackIcon.classList.add('displayHandlerIcon');
 goBackIcon.innerHTML = `
 <svg
   xmlns="http://www.w3.org/2000/svg"
@@ -48,46 +48,46 @@ goBackIcon.innerHTML = `
 </svg>
 `;
 
-const manualInputForm = document.createElement("div");
-manualInputForm.setAttribute("id", "ce-manual-form-box");
+const manualInputForm = document.createElement('div');
+manualInputForm.setAttribute('id', 'ce-manual-form-box');
 manualInputForm.innerHTML = `
     <input id="artistInput" class="manual-input" type="text" placeholder="artist" required>
     <input id="songInput" class="manual-input" type="text" placeholder="song title" required>
     <div id="ce-manual-button">Search</div>
 `;
 
-const loadingAnimation = document.createElement("div");
-loadingAnimation.setAttribute("id", "ce-lyrics-loader-container");
+const loadingAnimation = document.createElement('div');
+loadingAnimation.setAttribute('id', 'ce-lyrics-loader-container');
 loadingAnimation.innerHTML = `
 <svg id="ce-lyrics-loader-svg" viewBox="25 25 50 50">
 <circle id="ce-lyrics-loader-circle" r="20" cy="50" cx="50">
 </circle></svg>`;
 
-const loadingAnimationBlock = document.createElement("div");
-loadingAnimationBlock.setAttribute("id", "ce-primary-inner-loading-block");
-loadingAnimationBlock.setAttribute("show", true);
-loadingAnimationBlock.classList.add("ce-display-none");
-loadingAnimationBlock.classList.add("ce-inner-first-container");
+const loadingAnimationBlock = document.createElement('div');
+loadingAnimationBlock.setAttribute('id', 'ce-primary-inner-loading-block');
+loadingAnimationBlock.setAttribute('show', true);
+loadingAnimationBlock.classList.add('ce-display-none');
+loadingAnimationBlock.classList.add('ce-inner-first-container');
 loadingAnimationBlock.appendChild(loadingAnimation);
 
-const primaryInnerLyricsBlock = document.createElement("div");
-primaryInnerLyricsBlock.setAttribute("id", "ce-primary-inner-lyrics-block");
-primaryInnerLyricsBlock.setAttribute("show", false);
-primaryInnerLyricsBlock.classList.add("ce-display-none");
-primaryInnerLyricsBlock.classList.add("ce-inner-first-container");
+const primaryInnerLyricsBlock = document.createElement('div');
+primaryInnerLyricsBlock.setAttribute('id', 'ce-primary-inner-lyrics-block');
+primaryInnerLyricsBlock.setAttribute('show', false);
+primaryInnerLyricsBlock.classList.add('ce-display-none');
+primaryInnerLyricsBlock.classList.add('ce-inner-first-container');
 primaryInnerLyricsBlock.appendChild(searchIcon);
 // primaryInnerLyricsBlock.innerHTML = "";
 // primaryInnerLyricsBlock.appendChild(loadingAnimation);
 
-const primaryInnerLyricsToggler = document.createElement("div");
-primaryInnerLyricsToggler.setAttribute("id", "ce-primary-inner-lyrics-toggler");
-primaryInnerLyricsToggler.innerText = "Show Lyrics";
+const primaryInnerLyricsToggler = document.createElement('div');
+primaryInnerLyricsToggler.setAttribute('id', 'ce-primary-inner-lyrics-toggler');
+primaryInnerLyricsToggler.innerText = 'Show Lyrics';
 
-const innerManualBlock = document.createElement("div");
-innerManualBlock.setAttribute("id", "ce-primary-inner-manual-block");
-innerManualBlock.setAttribute("show", false);
-innerManualBlock.classList.add("ce-display-none");
-innerManualBlock.classList.add("ce-inner-first-container");
+const innerManualBlock = document.createElement('div');
+innerManualBlock.setAttribute('id', 'ce-primary-inner-manual-block');
+innerManualBlock.setAttribute('show', false);
+innerManualBlock.classList.add('ce-display-none');
+innerManualBlock.classList.add('ce-inner-first-container');
 innerManualBlock.appendChild(manualInputForm);
 innerManualBlock.appendChild(orDialog);
 
