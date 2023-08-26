@@ -1,5 +1,4 @@
-import { getLyrics } from "../src/scrape/getLyrics";
-const axios = require("axios");
+import "./video-page.css";
 
 import {
   manualInputForm,
@@ -13,7 +12,7 @@ import {
   loadingAnimationBlock,
   searchIcon,
   goBackIcon,
-} from "./utils/htmlComponents";
+} from "../utils/htmlComponents";
 
 (async () => {
   let lyricscrapeSettings = { fontSize: 12, lineHeight: 1.45 },
@@ -30,6 +29,37 @@ import {
     title: "",
     artist: "",
   };
+
+const getLyrics = (options) => {
+  return new Promise((resolve, reject) => {
+    const port = chrome.runtime.connect({ name: "lyrics-port" });
+
+    port.onMessage.addListener((response) => {
+      if (response.success) {
+        const lyrics = response.lyrics;
+        console.log("Lyrics:", lyrics);
+        resolve(lyrics);
+        if (lyrics === null) {
+          display(gLoadingBlock, gPrimaryManualBlock, noLyrics);
+        } else {
+          gPrimaryManualBlock.setAttribute("error", false);
+          display(gLoadingBlock, gPrimaryInnerLyricsBlock, "");
+          gPrimaryInnerLyricsBlock.innerText = lyrics;
+        }
+        port.disconnect();
+      } else {
+        console.error("Failed to fetch lyrics:", response.error);
+        reject(response.error);
+        display(gLoadingBlock, gPrimaryManualBlock, noLyrics);
+        port.disconnect();
+      }
+    });
+
+    port.postMessage({ action: "getLyrics", options });
+  });
+};
+
+
 
   const getVideoIdLocalStorage = (key) => {
     return new Promise((resolve, reject) => {
@@ -173,60 +203,6 @@ import {
     else event.srcElement.innerText = "Show Lyrics";
   };
 
-  async function checkProxy() {
-    try {
-      const proxyUrl = "http://110.34.13.4:8080";
-      const response = await axios.get("https://www.example.com", {
-        proxy: {
-          host: "110.34.13.4",
-          port: 8080,
-          protocol: "http",
-        },
-      });
-      const ipAddress = response.data;
-      console.log("My IP address:", ipAddress);
-      console.log(response.headers);
-      const viaHeader = response.headers.via;
-      if (viaHeader) {
-        console.log("Request was made through a proxy.");
-        console.log("Via:", viaHeader);
-      } else {
-        console.log("Request was not made through a proxy.");
-      }
-    } catch (error) {
-      console.error("Error occurred while testing the proxy:", error);
-    }
-  }
-
-  async function makeRequest(query) {
-    const targetUrl = `https://www.jiosaavn.com/api.php?p=1&q=${query}&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=20&__call=search.getResults`;
-
-    try {
-      const response = await axios.get(targetUrl);
-      // Return the response from the destination server
-      return response.data.results[0].id;
-    } catch (error) {
-      // Handle any errors
-      console.error(error);
-      throw error; // Rethrow the error to propagate it to the caller
-    }
-  }
-
-  async function lyricsRequest(id) {
-    const targetUrl = `https://www.jiosaavn.com/api.php?__call=lyrics.getLyrics&ctx=web6dot0&api_version=4&_format=json&_marker=0%3F_marker=0&lyrics_id=${id}`;
-
-    try {
-      const response = await axios.get(targetUrl);
-
-      // Return the response from the destination server
-      return response.data;
-    } catch (error) {
-      // Handle any errors
-      console.error(error);
-      throw error; // Rethrow the error to propagate it to the caller
-    }
-  }
-
   const fetchLyrics = async () => {
     const ytMusicVideoMetadata = document.querySelectorAll(
       "#description ytd-video-description-music-section-renderer"
@@ -248,37 +224,7 @@ import {
       console.log(options.artist);
 
       console.log("request sent");
-
-      // await checkProxy();
-
-      try {
-        const id = await makeRequest(options.title);
-        const lyrics = await lyricsRequest(id);
-        console.log(lyrics);
-      } catch (error) {
-        console.error(error);
-      }
-
-      await getLyrics(options).then(async (lyrics) => {
-        console.log("lyrics recieved");
-        const currentVideoId = await getVideoIdLocalStorage(
-          "lyricscrape-videoId"
-        );
-        if (currentVideoId === gVideoId) console.log("same");
-        else {
-          console.log("different");
-          return;
-        }
-        console.log("lyrics injected");
-        if (lyrics === null) {
-          gPrimaryManualBlock.setAttribute("error", true);
-          display(gLoadingBlock, gPrimaryManualBlock, noLyrics);
-        } else {
-          gPrimaryManualBlock.setAttribute("error", false);
-          display(gLoadingBlock, gPrimaryInnerLyricsBlock, "");
-          gPrimaryInnerLyricsBlock.innerText = lyrics;
-        }
-      });
+      getLyrics(options);
     } else {
       gPrimaryManualBlock.setAttribute("error", true);
       display(gLoadingBlock, gPrimaryManualBlock, noMetadata);
@@ -293,23 +239,7 @@ import {
       "#ce-manual-form-box #songInput"
     ).value;
     display(gPrimaryManualBlock, gLoadingBlock, "");
-    try {
-      const id = await makeRequest(options.title);
-      const lyrics = await lyricsRequest(id);
-      console.log(lyrics);
-    } catch (error) {
-      console.error(error);
-    }
-    await getLyrics(options).then((lyrics) => {
-      console.log("lyrics recieved");
-      if (lyrics === null) {
-        display(gLoadingBlock, gPrimaryManualBlock, noLyrics);
-      } else {
-        gPrimaryManualBlock.setAttribute("error", false);
-        display(gLoadingBlock, gPrimaryInnerLyricsBlock, "");
-        gPrimaryInnerLyricsBlock.innerText = lyrics;
-      }
-    });
+    getLyrics(options);
   };
 
   const waitDOMYtReqComponent = () => {
@@ -441,8 +371,6 @@ import {
 
   await retrieveSettings();
   gVideoId = await getVideoIdLocalStorage("lyricscrape-videoId");
-  console.log(gVideoId);
-  console.log(lyricscrapeSettings);
   waitDOMYtReqComponent();
   chrome.storage.onChanged.addListener(storageChangeHandler);
 })();

@@ -2,14 +2,15 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin"); 
 const tailwindcss = require("tailwindcss");
 const autoprefixer = require("autoprefixer");
 
 module.exports = {
   entry: {
     popup: "./src/popup/popup.jsx",
-    contentscript: "./src/contentscript.js",
-    background: "./src/background.js",
+    contentscript: "./src/contentscript/contentscript.js",
+    background: "./src/background/background.js",
   },
   output: {
     filename: "[name].js",
@@ -22,9 +23,17 @@ module.exports = {
       chunks: ["popup"],
     }),
     new CopyPlugin({
-      patterns: [{ from: "public" }, { from: "./src/inject.css" }],
+      patterns: [
+        { from: "public" },
+        { from: "./src/manifest.json" },
+        { from: "./src/contentscript/video-page.css" },
+      ],
     }),
     new CleanWebpackPlugin(),
+    new MiniCssExtractPlugin({ 
+      filename: "[name].css",
+      chunkFilename: "[id].css",
+    }),
   ],
   module: {
     rules: [
@@ -41,7 +50,7 @@ module.exports = {
       {
         test: /\.css$/i,
         use: [
-          "style-loader",
+          MiniCssExtractPlugin.loader, 
           {
             loader: "css-loader",
             options: {
@@ -49,7 +58,7 @@ module.exports = {
             },
           },
           {
-            loader: "postcss-loader", // postcss loader needed for tailwindcss
+            loader: "postcss-loader",
             options: {
               postcssOptions: {
                 ident: "postcss",

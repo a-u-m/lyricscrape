@@ -1,3 +1,23 @@
+import {getLyrics} from '../scrape/getLyrics';
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === "lyrics-port") {
+    port.onMessage.addListener(async(message) => {
+      if (message.action === "getLyrics") {
+        const options = message.options;
+        console.log(options)
+        try {
+          const lyrics = await getLyrics(options);
+          console.log(lyrics)
+          port.postMessage({ success: true, lyrics });
+        } catch (error) {
+          port.postMessage({ success: false, error: "Failed to fetch lyrics." });
+        }
+      }
+    });
+  }
+});
+
 const setVideoIdLocalStorage = (key, value) => {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: value }, () => {
@@ -23,10 +43,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     });
   if (tab.url && tab.url.includes("youtube") && tab.url.includes("watch")) {
     if (changeInfo.status == "complete") {
-      console.log("again");
-      const url = new URL(tab.url);
-      const videoId = url.searchParams.get("v");
-      console.log(videoId);
       chrome.scripting.executeScript(
         {
           target: { tabId: tabId },
@@ -37,7 +53,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         }
       );
       chrome.scripting.insertCSS({
-        files: ["inject.css"],
+        files: ["video-page.css"],
         target: { tabId: tabId },
       });
     }
